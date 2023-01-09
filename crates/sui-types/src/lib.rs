@@ -30,6 +30,7 @@ pub mod crypto;
 pub mod digests;
 pub mod dynamic_field;
 pub mod event;
+pub mod filter;
 pub mod gas;
 pub mod gas_coin;
 pub mod governance;
@@ -40,6 +41,7 @@ pub mod message_envelope;
 pub mod messages;
 pub mod messages_checkpoint;
 pub mod move_package;
+pub mod multisig;
 pub mod object;
 pub mod query;
 pub mod quorum_driver_types;
@@ -48,8 +50,6 @@ pub mod storage;
 pub mod sui_serde;
 pub mod sui_system_state;
 pub mod temporary_store;
-
-pub mod filter;
 
 #[path = "./unit_tests/utils.rs"]
 pub mod utils;
