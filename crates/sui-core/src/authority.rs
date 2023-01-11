@@ -46,7 +46,7 @@ use narwhal_config::{
 use sui_adapter::{adapter, execution_mode};
 use sui_config::genesis::Genesis;
 use sui_json_rpc_types::{
-    type_and_fields_from_move_struct, DevInspectResults, SuiEvent, SuiEventEnvelope,
+    type_and_fields_from_move_struct, DevInspectResults, SuiEvent, SuiEventEnvelope, SuiMoveValue,
     SuiTransactionEffects,
 };
 use sui_macros::nondeterministic;
@@ -59,7 +59,7 @@ use sui_storage::{
 };
 use sui_types::committee::EpochId;
 use sui_types::crypto::{sha3_hash, AuthorityKeyPair, NetworkKeyPair};
-use sui_types::dynamic_field::{DynamicFieldInfo, DynamicFieldType};
+use sui_types::dynamic_field::{DynamicFieldInfo, DynamicFieldName, DynamicFieldType};
 use sui_types::event::{Event, EventID};
 use sui_types::gas::{GasCostSummary, GasPrice, SuiGasStatus};
 use sui_types::messages_checkpoint::{
@@ -1305,6 +1305,11 @@ impl AuthorityState {
         let (name, type_, object_id) =
             DynamicFieldInfo::parse_move_object(&move_struct).tap_err(|e| warn!("{e}"))?;
 
+        let name = DynamicFieldName {
+            type_: SuiMoveValue::parse_move_value_type(&name),
+            value: SuiMoveValue::from(name).to_json_value(),
+        };
+
         Ok(Some(match type_ {
             DynamicFieldType::DynamicObject => {
                 // Find the actual object from storage using the object id obtained from the wrapper.
@@ -2062,7 +2067,7 @@ impl AuthorityState {
     pub fn get_dynamic_field_object_id(
         &self,
         owner: ObjectID,
-        name: &str,
+        name: &DynamicFieldName,
     ) -> SuiResult<Option<ObjectID>> {
         if let Some(indexes) = &self.indexes {
             indexes.get_dynamic_field_object_id(owner, name)
