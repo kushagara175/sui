@@ -63,6 +63,7 @@ impl CommitteeFixture {
             previous_digest: None,
             epoch_rolling_gas_cost_summary: Default::default(),
             next_epoch_committee: None,
+            root_state_digest: None,
             timestamp_ms: 0,
         };
 
@@ -119,6 +120,7 @@ impl CommitteeFixture {
                 previous_digest: Some(prev.summary.digest()),
                 epoch_rolling_gas_cost_summary: Default::default(),
                 next_epoch_committee: None,
+                root_state_digest: None,
                 timestamp_ms: 0,
             };
 
@@ -162,6 +164,8 @@ impl CommitteeFixture {
             previous_digest: Some(previous_checkpoint.summary.digest()),
             epoch_rolling_gas_cost_summary: Default::default(),
             next_epoch_committee: Some(next_epoch_committee),
+            // TODO(william): make non-None once we run this in consensus
+            root_state_digest: None,
             timestamp_ms: 0,
         };
 
