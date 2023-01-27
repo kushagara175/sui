@@ -94,6 +94,7 @@ impl SuiClientBuilder {
         };
 
         let http = HttpClientBuilder::default()
+            .max_request_body_size(2 << 30)
             .set_headers(headers.clone())
             .request_timeout(self.request_timeout)
             .max_concurrent_requests(self.max_concurrent_requests)
