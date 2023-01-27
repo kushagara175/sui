@@ -24,21 +24,33 @@ async fn get_gas_status(
     transaction: &TransactionData,
 ) -> SuiResult<SuiGasStatus<'static>> {
     let tx_kind = &transaction.kind;
-    let gas_object_ref = transaction.gas_payment_object_ref();
-    let gas_object_refs = match tx_kind {
-        TransactionKind::Single(SingleTransactionKind::PaySui(p)) => p.coins.clone(),
-        TransactionKind::Single(SingleTransactionKind::PayAllSui(p)) => p.coins.clone(),
-        _ => vec![],
-    };
-    let extra_gas_object_refs = gas_object_refs.into_iter().skip(1).collect();
+    if transaction.gas().is_empty() {
+        return Err(SuiError::into_transaction_input_error(
+            SuiError::MissingGasPayment,
+        ));
+    }
+    // vec<coin> non empty. Get the first coin and make it "the gas coin"
+    // keep track of all others that can contribute to gas (gas smashing and
+    // special transactions)
+    let empty_coins = vec![];
+    let gas_coin_ref = transaction.gas().get(0).unwrap();
+    let gas_object_refs = transaction.gas()[1..]
+        .iter()
+        .chain(match tx_kind {
+            TransactionKind::Single(SingleTransactionKind::PaySui(p)) => p.coins.iter(),
+            TransactionKind::Single(SingleTransactionKind::PayAllSui(p)) => p.coins.iter(),
+            _ => empty_coins.iter(),
+        })
+        .copied()
+        .collect();
 
     check_gas(
         store,
-        gas_object_ref,
+        gas_coin_ref,
         transaction.gas_budget,
         transaction.gas_price,
         &transaction.kind,
-        extra_gas_object_refs,
+        gas_object_refs,
     )
     .await
     .map_err(SuiError::into_transaction_input_error)
@@ -69,7 +81,8 @@ pub(crate) async fn check_dev_inspect_input(
     gas_object: Object,
 ) -> Result<(ObjectRef, InputObjects), anyhow::Error> {
     let gas_object_ref = gas_object.compute_object_reference();
-    TransactionData::validity_check_impl(kind, &gas_object_ref)?;
+    // TODO: review this whole story of dev inspect and dry run
+    TransactionData::validity_check_impl(kind, &[gas_object_ref])?;
     for k in kind.single_transactions() {
         match k {
             SingleTransactionKind::TransferObject(_)
@@ -134,8 +147,8 @@ pub async fn check_certificate_input(
 }
 
 /// Checking gas budget by fetching the gas object only from the store,
-/// and check whether the balance and budget satisfies the miminum requirement.
-/// Returns the gas object (to be able to reuse it latter) and a gas status
+/// and check whether the balance and budget satisfies the minimum requirement.
+/// Returns the gas object (to be able to reuse it later) and a gas status
 /// that will be used in the entire lifecycle of the transaction execution.
 #[instrument(level = "trace", skip_all)]
 async fn check_gas(
@@ -155,6 +168,16 @@ async fn check_gas(
             version: Some(gas_payment.1),
         })?;
 
+        let mut additional_objs = vec![];
+        for obj_ref in additional_objects_for_gas_payment.iter() {
+            let obj = store.get_object_by_key(&obj_ref.0, obj_ref.1)?;
+            let obj = obj.ok_or(SuiError::ObjectNotFound {
+                object_id: obj_ref.0,
+                version: Some(obj_ref.1),
+            })?;
+            additional_objs.push(obj);
+        }
+
         // If the transaction is TransferSui, we ensure that the gas balance is enough to cover
         // both gas budget and the transfer amount.
         let extra_amount = match tx_kind {
@@ -167,26 +190,13 @@ async fn check_gas(
         // TODO: We should revisit how we compute gas price and compare to gas budget.
         let gas_price = std::cmp::max(computation_gas_price, STORAGE_GAS_PRICE);
 
-        if tx_kind.is_pay_sui_tx() {
-            let mut additional_objs = vec![];
-            for obj_ref in additional_objects_for_gas_payment.iter() {
-                let obj = store.get_object_by_key(&obj_ref.0, obj_ref.1)?;
-                let obj = obj.ok_or(SuiError::ObjectNotFound {
-                    object_id: obj_ref.0,
-                    version: Some(obj_ref.1),
-                })?;
-                additional_objs.push(obj);
-            }
-            gas::check_gas_balance(
-                &gas_object,
-                gas_budget,
-                gas_price,
-                extra_amount,
-                additional_objs,
-            )?;
-        } else {
-            gas::check_gas_balance(&gas_object, gas_budget, gas_price, extra_amount, vec![])?;
-        }
+        gas::check_gas_balance(
+            &gas_object,
+            gas_budget,
+            gas_price,
+            extra_amount,
+            additional_objs,
+        )?;
 
         gas::start_gas_metering(gas_budget, computation_gas_price, STORAGE_GAS_PRICE)
     }

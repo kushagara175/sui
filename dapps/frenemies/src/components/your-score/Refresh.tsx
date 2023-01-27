@@ -46,7 +46,7 @@ export function Refresh({ scorecard, round, leaderboardID }: Props) {
         packageObjectId: config.VITE_PKG,
         module: "frenemies",
         function: "update",
-        gasPayment: normalizeSuiAddress(gas.reference.objectId),
+        gasPayment: [normalizeSuiAddress(gas.reference.objectId)],
         typeArguments: [],
         gasBudget: Number(GAS_BUDGET),
         arguments: [

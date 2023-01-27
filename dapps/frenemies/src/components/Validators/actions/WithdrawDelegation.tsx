@@ -49,7 +49,7 @@ export function WithdrawDelegation({ stake, delegation }: Props) {
           function: "request_withdraw_delegation",
           gasBudget: Number(GAS_BUDGET),
           typeArguments: [],
-          gasPayment: normalizeSuiAddress(gas.reference.objectId),
+          gasPayment: [normalizeSuiAddress(gas.reference.objectId)],
           arguments: [
             SUI_SYSTEM_ID,
             normalizeSuiAddress(delegation.reference.objectId),

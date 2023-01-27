@@ -123,12 +123,14 @@
           "result": {
             "name": "Result",
             "value": {
-              "txBytes": "AQICAAAAAAAAAAAAAAAAAAAAAAAAAAIKZGV2bmV0X25mdARtaW50AAMAC0V4YW1wbGUgTkZUACtBbiBORlQgY3JlYXRlZCBieSB0aGUgU3VpIENvbW1hbmQgTGluZSBUb29sAEJpcGZzOi8vYmFma3JlaWJuZ3FobDNnYWE3ZGFvYjRpMnZjY3ppYXkyampscDQzNWNmNjZ2aG9ubzducnZ3dzUzdHkAxhkVTEKhxhvpkCcXskuOwWj+SJbv75LL9EtYHyMiLBCRaxejabTaAwEAAAAAAAAAIJ0HWVK1gDbyp7VhRGWSQDxnLw2+Ep8eORE/n2Fk6ihnmweBXwRJfi4F0iysOqBhQQsghoz1twzLEPGnBeBh0P36GJYY0osNRAEAAAAAAAAAIPjezPPDxRjxRt6VVPA/J6g9WxGF855x7zV+K9nhOWJRAQAAAAAAAADoAwAAAAAAAA==",
-              "gas": {
-                "objectId": "0xf5b70ccb10f1a705e061d0fdfa189618d28b0d44",
-                "version": 1,
-                "digest": "+N7M88PFGPFG3pVU8D8nqD1bEYXznnHvNX4r2eE5YlE="
-              },
+              "txBytes": "AQICAAAAAAAAAAAAAAAAAAAAAAAAAAIKZGV2bmV0X25mdARtaW50AAMAC0V4YW1wbGUgTkZUACtBbiBORlQgY3JlYXRlZCBieSB0aGUgU3VpIENvbW1hbmQgTGluZSBUb29sAEJpcGZzOi8vYmFma3JlaWJuZ3FobDNnYWE3ZGFvYjRpMnZjY3ppYXkyampscDQzNWNmNjZ2aG9ubzducnZ3dzUzdHkAxhkVTEKhxhvpkCcXskuOwWj+SJbv75LL9EtYHyMiLBCRaxejabTaAwEAAAAAAAAAIJ0HWVK1gDbyp7VhRGWSQDxnLw2+Ep8eORE/n2Fk6ihnmweBXwRJfi4F0iysOqBhQQsghowB9bcMyxDxpwXgYdD9+hiWGNKLDUQBAAAAAAAAACD43szzw8UY8UbelVTwPyeoPVsRhfOece81fivZ4TliUQEAAAAAAAAA6AMAAAAAAAA=",
+              "gas": [
+                {
+                  "objectId": "0xf5b70ccb10f1a705e061d0fdfa189618d28b0d44",
+                  "version": 1,
+                  "digest": "+N7M88PFGPFG3pVU8D8nqD1bEYXznnHvNX4r2eE5YlE="
+                }
+              ],
               "inputObjects": [
                 {
                   "MovePackage": "0x0000000000000000000000000000000000000002"
@@ -276,11 +278,11 @@
           "params": [
             {
               "name": "tx_bytes",
-              "value": "AACVVpf+K3BMlUCjhG6SmLddtyXB7jAnt4PqaJ4aOOtHbG78RO21zT3+AgAAAAAAAAAgAouPAuQwKlWV2IiaZ8bTHGyXDlZ/A+9n2BGk+ENmW40QurA5KK57xHIiIuMF8/Nig+JbtjL0v2w+isQu7xOF4BQD5JpLKWrcAgAAAAAAAAAgsi6ifTyS5M4iVqxkXLq9w2zxufLshIGibKfYEWlVl5QBAAAAAAAAAOgDAAAAAAAA"
+              "value": "AACVVpf+K3BMlUCjhG6SmLddtyXB7jAnt4PqaJ4aOOtHbG78RO21zT3+AgAAAAAAAAAgAouPAuQwKlWV2IiaZ8bTHGyXDlZ/A+9n2BGk+ENmW40QurA5KK57xHIiIuMF8/Nig+JbtgEy9L9sPorELu8TheAUA+SaSylq3AIAAAAAAAAAILIuon08kuTOIlasZFy6vcNs8bny7ISBomyn2BFpVZeUAQAAAAAAAADoAwAAAAAAAA=="
             },
             {
               "name": "signature",
-              "value": "AACunVNQ+43nTvpMty4ILN+tTvYAaUsYn3Spu1eZu7SZVTPs5tkYxPF8h1o6iFDgDgq/rrua+hMNxMkGYVhXtw+NZVNaIOpz/rPnTIA7TCFEizybXsMse2pIqWIapAFigQ=="
+              "value": "APDItIbM7deisgya4jjXIbll9mA61asXW86mbWoJ9entM2aGkLS86Tlu6WplXhJlH1uRc/DbcrUm7HIl2ybXdwGNZVNaIOpz/rPnTIA7TCFEizybXsMse2pIqWIapAFigQ=="
             },
             {
               "name": "request_type",
@@ -291,7 +293,7 @@
             "name": "Result",
             "value": {
               "certificate": {
-                "transactionDigest": "5Cb9XuZbdpd2behLmGAhQTu1YYZbWae53KHiQxeqEPoR",
+                "transactionDigest": "4BqKf7ySbGTNJkbmCDyE7FtJCsNHCACQ19pEM7a5owf7",
                 "data": {
                   "transactions": [
                     {
@@ -306,15 +308,17 @@
                     }
                   ],
                   "sender": "0x10bab03928ae7bc4722222e305f3f36283e25bb6",
-                  "gasPayment": {
-                    "objectId": "0x32f4bf6c3e8ac42eef1385e01403e49a4b296adc",
-                    "version": 2,
-                    "digest": "si6ifTyS5M4iVqxkXLq9w2zxufLshIGibKfYEWlVl5Q="
-                  },
+                  "gasPayment": [
+                    {
+                      "objectId": "0x32f4bf6c3e8ac42eef1385e01403e49a4b296adc",
+                      "version": 2,
+                      "digest": "si6ifTyS5M4iVqxkXLq9w2zxufLshIGibKfYEWlVl5Q="
+                    }
+                  ],
                   "gasPrice": 1,
                   "gasBudget": 1000
                 },
-                "txSignature": "AACunVNQ+43nTvpMty4ILN+tTvYAaUsYn3Spu1eZu7SZVTPs5tkYxPF8h1o6iFDgDgq/rrua+hMNxMkGYVhXtw+NZVNaIOpz/rPnTIA7TCFEizybXsMse2pIqWIapAFigQ==",
+                "txSignature": "APDItIbM7deisgya4jjXIbll9mA61asXW86mbWoJ9entM2aGkLS86Tlu6WplXhJlH1uRc/DbcrUm7HIl2ybXdwGNZVNaIOpz/rPnTIA7TCFEizybXsMse2pIqWIapAFigQ==",
                 "authSignInfo": {
                   "epoch": 0,
                   "signature": "AaCQESRLSxMntCxHAXuRk66nmlID2DZn3gU64vkZ7iHSjE2Nbhfr21Ovri7AMdAl4Q==",
@@ -905,13 +909,13 @@
             {
               "name": "query",
               "value": {
-                "Transaction": "MT81NY2FQZFxoWgxTJAf1kfc44Ao7SwdXSQg8jMVY5P"
+                "Transaction": "HwEGKvHjuu4jd4WHDxoYADV3ffv1xFZbmxXMy5Fc2PA"
               }
             },
             {
               "name": "cursor",
               "value": {
-                "txDigest": "MT81NY2FQZFxoWgxTJAf1kfc44Ao7SwdXSQg8jMVY5P",
+                "txDigest": "HwEGKvHjuu4jd4WHDxoYADV3ffv1xFZbmxXMy5Fc2PA",
                 "eventSeq": 10
               }
             },
@@ -930,9 +934,9 @@
               "data": [
                 {
                   "timestamp": 0,
-                  "txDigest": "MT81NY2FQZFxoWgxTJAf1kfc44Ao7SwdXSQg8jMVY5P",
+                  "txDigest": "HwEGKvHjuu4jd4WHDxoYADV3ffv1xFZbmxXMy5Fc2PA",
                   "id": {
-                    "txDigest": "MT81NY2FQZFxoWgxTJAf1kfc44Ao7SwdXSQg8jMVY5P",
+                    "txDigest": "HwEGKvHjuu4jd4WHDxoYADV3ffv1xFZbmxXMy5Fc2PA",
                     "eventSeq": 0
                   },
                   "event": {
@@ -1578,14 +1582,14 @@
           "params": [
             {
               "name": "digest",
-              "value": "EF5c2cKt1tkhQXGDLyUwPfYThUSGGJm21A6fSAf1wgL1"
+              "value": "Gpt2kCAJCSHSqEkTfQxGz5nQjgbFxGgeEiQeG6fPD9gV"
             }
           ],
           "result": {
             "name": "Result",
             "value": {
               "certificate": {
-                "transactionDigest": "EF5c2cKt1tkhQXGDLyUwPfYThUSGGJm21A6fSAf1wgL1",
+                "transactionDigest": "Gpt2kCAJCSHSqEkTfQxGz5nQjgbFxGgeEiQeG6fPD9gV",
                 "data": {
                   "transactions": [
                     {
@@ -1600,15 +1604,17 @@
                     }
                   ],
                   "sender": "0xc92b7e018bc38f6a58cf45882572aed10aebf170",
-                  "gasPayment": {
-                    "objectId": "0x24b91c4b8ae6d4cd6e1e02f6658d21bce9b88bdc",
-                    "version": 2,
-                    "digest": "7uEpQUTuxHzzk4i7aA9pt0JrxSkpaS/cfS/zdMP4cPM="
-                  },
+                  "gasPayment": [
+                    {
+                      "objectId": "0x24b91c4b8ae6d4cd6e1e02f6658d21bce9b88bdc",
+                      "version": 2,
+                      "digest": "7uEpQUTuxHzzk4i7aA9pt0JrxSkpaS/cfS/zdMP4cPM="
+                    }
+                  ],
                   "gasPrice": 1,
                   "gasBudget": 1000
                 },
-                "txSignature": "AFZ8tG38gA3u5IuKSokps32CdlDnnpmimXshB3im6qUj+22Ltqqk63mAb3IHgOo1+oNueMdQURjAsGWt5eENpAQDLkEuBAj2KOz9QdstOZDvZkpc3HAEpmjABCW7F+5FSQ==",
+                "txSignature": "AMD/LrkCMKW4ST5YUVLgj4TyeJNs9YsSF2tqXN1mBa/tibxbQPv676pXKEAX6ncGl02znWaX9K+pKHIC0/byrwADLkEuBAj2KOz9QdstOZDvZkpc3HAEpmjABCW7F+5FSQ==",
                 "authSignInfo": {
                   "epoch": 0,
                   "signature": "AaCQESRLSxMntCxHAXuRk66nmlID2DZn3gU64vkZ7iHSjE2Nbhfr21Ovri7AMdAl4Q==",
@@ -1720,7 +1726,7 @@
           "params": [
             {
               "name": "digest",
-              "value": "HS465DxR24tPw728qwsngp5LABDWBVYGbEw54Bc39EP6"
+              "value": "DmYvhW7ZwUQEtBKGZyFVV9xFkVEa2jLthr2etnb7pmmf"
             }
           ],
           "result": {
@@ -6082,11 +6088,10 @@
         "properties": {
           "gas": {
             "description": "the gas object to be used",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectRef"
-              }
-            ]
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObjectRef"
+            }
           },
           "inputObjects": {
             "description": "objects to be used in this transaction",
@@ -6121,7 +6126,10 @@
             "minimum": 0.0
           },
           "gasPayment": {
-            "$ref": "#/components/schemas/ObjectRef"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObjectRef"
+            }
           },
           "gasPrice": {
             "type": "integer",

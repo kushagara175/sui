@@ -48,7 +48,7 @@ export function CancelDelegation({ stake }: Props) {
           function: "cancel_delegation_request",
           gasBudget: Number(GAS_BUDGET),
           typeArguments: [],
-          gasPayment: normalizeSuiAddress(gas.reference.objectId),
+          gasPayment: [normalizeSuiAddress(gas.reference.objectId)],
           arguments: [
             SUI_SYSTEM_ID,
             normalizeSuiAddress(stake.reference.objectId),

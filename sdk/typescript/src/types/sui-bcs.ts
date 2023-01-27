@@ -252,7 +252,7 @@ export type TransactionData = {
   gasBudget: number;
   gasPrice: number;
   kind: TransactionKind;
-  gasPayment: SuiObjectRef;
+  gasPayment: SuiObjectRef[];
 };
 
 export const TRANSACTION_DATA_TYPE_TAG = Array.from('TransactionData::').map(
@@ -405,7 +405,7 @@ const BCS_SPEC = {
     struct: {
       kind: 'TransactionKind',
       sender: 'address',
-      gasPayment: 'SuiObjectRef',
+      gasPayment: 'vector<SuiObjectRef>',
       gasPrice: 'u64',
       gasBudget: 'u64',
     },
@@ -431,6 +431,29 @@ const BCS_0_23_SPEC = {
       arguments: 'vector<CallArg>',
     },
   },
+
+  TransactionData: {
+    struct: {
+      kind: 'TransactionKind',
+      sender: 'address',
+      gasPayment: 'SuiObjectRef',
+      gasPrice: 'u64',
+      gasBudget: 'u64',
+    },
+  },
+};
+
+const BCS_0_24_SPEC = {
+  ...BCS_SPEC,
+  TransactionData: {
+    struct: {
+      kind: 'TransactionKind',
+      sender: 'address',
+      gasPayment: 'SuiObjectRef',
+      gasPrice: 'u64',
+      gasBudget: 'u64',
+    },
+  },
 };
 
 const bcs = new BCS(getSuiMoveConfig());
@@ -444,9 +467,17 @@ registerUTF8String(bcs_0_23);
 registerObjectDigest(bcs_0_23);
 registerTypes(bcs_0_23, BCS_0_23_SPEC);
 
+// ========== Backward Compatibility (remove after v0.25 deploys) ===========
+const bcs_0_24 = new BCS(getSuiMoveConfig());
+registerUTF8String(bcs_0_24);
+registerObjectDigest(bcs_0_24);
+registerTypes(bcs_0_24, BCS_0_24_SPEC);
+
 export function bcsForVersion(v?: RpcApiVersion) {
   if (v?.major === 0 && v?.minor < 24) {
     return bcs_0_23;
+  } else if (v?.major === 0 && v?.minor < 25) {
+    return bcs_0_24;
   } else {
     return bcs;
   }

@@ -113,7 +113,7 @@ export type SuiTransactionKind = Infer<typeof SuiTransactionKind>;
 export const SuiTransactionData = object({
   transactions: array(SuiTransactionKind),
   sender: SuiAddress,
-  gasPayment: SuiObjectRef,
+  gasPayment: union([SuiObjectRef, array(SuiObjectRef)]),
   // TODO: remove optional after 0.21.0 is released
   gasPrice: optional(number()),
   gasBudget: number(),
@@ -299,7 +299,7 @@ export const AuthorityName = string();
 
 export const TransactionBytes = object({
   txBytes: string(),
-  gas: SuiObjectRef,
+  gas: union([SuiObjectRef, array(SuiObjectRef)]),
   // TODO: Type input_objects field
   inputObjects: unknown(),
 });
@@ -405,7 +405,7 @@ export function getTransactionSender(tx: CertifiedTransaction): SuiAddress {
 
 export function getTransactionGasObject(
   tx: CertifiedTransaction,
-): SuiObjectRef {
+): SuiObjectRef | SuiObjectRef[] {
   return tx.data.gasPayment;
 }
 

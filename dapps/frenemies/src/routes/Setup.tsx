@@ -91,7 +91,7 @@ export function Setup() {
           function: "register",
           arguments: [username, config.VITE_REGISTRY, SUI_SYSTEM_ID],
           typeArguments: [],
-          gasPayment: gas.reference.objectId,
+          gasPayment: [gas.reference.objectId],
 
           // TODO: Fix in sui.js - add option to use bigint...
           gasBudget: Number(GAS_BUDGET),
