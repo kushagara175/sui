@@ -10,7 +10,6 @@
 -  [Function `decompress_pubkey`](#0x2_ecdsa_k1_decompress_pubkey)
 -  [Function `keccak256`](#0x2_ecdsa_k1_keccak256)
 -  [Function `secp256k1_verify`](#0x2_ecdsa_k1_secp256k1_verify)
--  [Function `secp256k1_verify_recoverable`](#0x2_ecdsa_k1_secp256k1_verify_recoverable)
 
 
 <pre><code></code></pre>
@@ -24,6 +23,7 @@
 
 <a name="0x2_ecdsa_k1_EFailToRecoverPubKey"></a>
 
+Error if the public key cannot be recovered from the signature.
 
 
 <pre><code><b>const</b> <a href="ecdsa_k1.md#0x2_ecdsa_k1_EFailToRecoverPubKey">EFailToRecoverPubKey</a>: u64 = 0;
@@ -33,6 +33,7 @@
 
 <a name="0x2_ecdsa_k1_EInvalidSignature"></a>
 
+Error if the signature is invalid.
 
 
 <pre><code><b>const</b> <a href="ecdsa_k1.md#0x2_ecdsa_k1_EInvalidSignature">EInvalidSignature</a>: u64 = 1;
@@ -73,6 +74,18 @@ applied to Secp256k1 signatures.
 
 </details>
 
+<details>
+<summary>Specification</summary>
+
+
+
+<pre><code><b>pragma</b> opaque;
+</code></pre>
+
+
+
+</details>
+
 <a name="0x2_ecdsa_k1_decompress_pubkey"></a>
 
 ## Function `decompress_pubkey`
@@ -99,6 +112,18 @@ otherwise throw error.
 
 </details>
 
+<details>
+<summary>Specification</summary>
+
+
+
+<pre><code><b>pragma</b> opaque;
+</code></pre>
+
+
+
+</details>
+
 <a name="0x2_ecdsa_k1_keccak256"></a>
 
 ## Function `keccak256`
@@ -117,6 +142,18 @@ Hash the input bytes using keccak256 and returns 32 bytes.
 
 
 <pre><code><b>public</b> <b>native</b> <b>fun</b> <a href="ecdsa_k1.md#0x2_ecdsa_k1_keccak256">keccak256</a>(data: &<a href="">vector</a>&lt;u8&gt;): <a href="">vector</a>&lt;u8&gt;;
+</code></pre>
+
+
+
+</details>
+
+<details>
+<summary>Specification</summary>
+
+
+
+<pre><code><b>pragma</b> opaque;
 </code></pre>
 
 
@@ -154,31 +191,12 @@ If the signature is valid to the pubkey and hashed message, return true. Else fa
 
 </details>
 
-<a name="0x2_ecdsa_k1_secp256k1_verify_recoverable"></a>
-
-## Function `secp256k1_verify_recoverable`
-
-@param signature: A 65-bytes signature in form (r, s, v) that is signed using
-Secp256k1. This is an recoverable signature with recovery id denoted as v.
-Reference implementation on signature generation using RFC6979:
-https://github.com/MystenLabs/fastcrypto/blob/74aec4886e62122a5b769464c2bea5f803cf8ecc/fastcrypto/src/secp256k1/mod.rs#L193
-
-@param public_key: The public key to verify the signature against
-@param hashed_msg: The hashed 32-bytes message, same as what the signature is signed against.
-
-If the signature is valid to the pubkey and hashed message, return true. Else false.
-
-
-<pre><code><b>public</b> <b>fun</b> <a href="ecdsa_k1.md#0x2_ecdsa_k1_secp256k1_verify_recoverable">secp256k1_verify_recoverable</a>(signature: &<a href="">vector</a>&lt;u8&gt;, public_key: &<a href="">vector</a>&lt;u8&gt;, hashed_msg: &<a href="">vector</a>&lt;u8&gt;): bool
-</code></pre>
-
-
-
 <details>
-<summary>Implementation</summary>
+<summary>Specification</summary>
 
 
-<pre><code><b>public</b> <b>native</b> <b>fun</b> <a href="ecdsa_k1.md#0x2_ecdsa_k1_secp256k1_verify_recoverable">secp256k1_verify_recoverable</a>(signature: &<a href="">vector</a>&lt;u8&gt;, public_key: &<a href="">vector</a>&lt;u8&gt;, hashed_msg: &<a href="">vector</a>&lt;u8&gt;): bool;
+
+<pre><code><b>pragma</b> opaque;
 </code></pre>
 
 
