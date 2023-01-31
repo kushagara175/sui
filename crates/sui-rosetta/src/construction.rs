@@ -198,11 +198,16 @@ pub async fn metadata(
             sender, amounts, ..
         } => {
             let amount = amounts.iter().sum::<u64>() as u128;
-            let sender_coins = context
+            let mut sender_coins = context
                 .client
                 .coin_read_api()
                 .select_coins(*sender, None, amount + 1000, None, vec![])
                 .await?
+                .into_iter()
+                .collect::<Vec<_>>();
+            // Sort by largest coin first
+            sender_coins.sort_by(|coin1, coin2| coin2.balance.cmp(&coin1.balance));
+            let sender_coins = sender_coins
                 .into_iter()
                 .map(|coin| coin.object_ref())
                 .collect::<Vec<_>>();
