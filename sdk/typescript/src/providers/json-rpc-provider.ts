@@ -59,7 +59,7 @@ import {
   CheckPointContentsDigest,
   CommitteeInfo,
 } from '../types';
-import { DynamicFieldPage } from '../types/dynamic_fields';
+import { DynamicFieldName, DynamicFieldPage } from '../types/dynamic_fields';
 import {
   PublicKey,
   SignatureScheme,
@@ -964,7 +964,7 @@ export class JsonRpcProvider extends Provider {
 
   async getDynamicFieldObject(
     parent_object_id: ObjectId,
-    name: string,
+    name: DynamicFieldName
   ): Promise<GetObjectDataResponse> {
     try {
       const resp = await this.client.requestWithType(
