@@ -994,16 +994,43 @@ impl TransactionData {
     }
 
     pub fn validity_check(&self) -> SuiResult {
-        // Self::validity_check_impl(&self.kind, self.gas_payment_object_ref())
-        Self::validity_check_impl(&self.kind, self.gas_data())
+        Self::validity_check_impl(&self.kind, self.gas_payment_object_ref())?;
+        // Self::validity_check_impl(&self.kind, self.gas_data())?;
+        self.check_sponsorship()
     }
 
-    fn check_sponsorship(kind: &TransactionKind, gas_data: &GasData) -> SuiResult {
-        if matches!()
+    /// Check if the transaction is compliant with sponsorship.
+    fn check_sponsorship(&self) -> SuiResult {
+        // FIXME add tests for this
+        // Not a sponsored transaction, nothing to check
+        if self.gas_owner() == self.signer() {
+            return Ok(());
+        }
+        let allow_sponsored_tx = match &self.kind {
+            // Note: the check for Batch is based on the assumption that
+            // Batch transaction has the same or more restricted
+            // transaction kind limits.
+            TransactionKind::Batch(_b) => true,
+            TransactionKind::Single(s) => match s {
+                SingleTransactionKind::Call(_)
+                | SingleTransactionKind::TransferObject(_)
+                | SingleTransactionKind::Pay(_)
+                | SingleTransactionKind::Publish(_) => true,
+                SingleTransactionKind::TransferSui(_)
+                | SingleTransactionKind::PaySui(_)
+                | SingleTransactionKind::PayAllSui(_)
+                | SingleTransactionKind::ChangeEpoch(_)
+                | SingleTransactionKind::Genesis(_) => false,
+            },
+        };
+        if allow_sponsored_tx {
+            return Ok(());
+        }
+        Err(SuiError::UnsupportedSponsoredTransactionKind)
     }
 
-    // pub fn validity_check_impl(kind: &TransactionKind, gas_payment: &ObjectRef) -> SuiResult {
-    pub fn validity_check_impl(kind: &TransactionKind, gas_data: &GasData) -> SuiResult {
+    pub fn validity_check_impl(kind: &TransactionKind, gas_payment: &ObjectRef) -> SuiResult {
+        // pub fn validity_check_impl(kind: &TransactionKind, gas_data: &GasData) -> SuiResult {
         fp_ensure!(
             !kind.is_blocked_move_function(),
             SuiError::BlockedMoveFunction
@@ -1031,8 +1058,8 @@ impl TransactionData {
                 fp_ensure!(
                     valid,
                     SuiError::InvalidBatchTransaction {
-                        error: "Batch transaction contains non-batchable transactions. Only Call \
-                        and TransferObject are allowed"
+                        error: "Batch transaction contains non-batchable transactions. Only Call,
+                        Pay and TransferObject are allowed"
                             .to_string()
                     }
                 );
@@ -1049,7 +1076,7 @@ impl TransactionData {
                     fp_ensure!(!p.coins.is_empty(), SuiError::EmptyInputCoins);
                     fp_ensure!(
                         // unwrap() is safe because coins are not empty.
-                        p.coins.first().unwrap() == &gas_data.gas_payment,
+                        p.coins.first().unwrap() == gas_payment,
                         SuiError::UnexpectedGasPaymentObject
                     );
                 }
@@ -1057,7 +1084,7 @@ impl TransactionData {
                     fp_ensure!(!pa.coins.is_empty(), SuiError::EmptyInputCoins);
                     fp_ensure!(
                         // unwrap() is safe because coins are not empty.
-                        pa.coins.first().unwrap() == &gas_data.gas_payment,
+                        pa.coins.first().unwrap() == gas_payment,
                         SuiError::UnexpectedGasPaymentObject
                     );
                 }

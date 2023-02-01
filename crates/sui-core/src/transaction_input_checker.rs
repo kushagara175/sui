@@ -52,6 +52,7 @@ pub async fn check_transaction_input(
     store: &AuthorityStore,
     transaction: &TransactionData,
 ) -> SuiResult<(SuiGasStatus<'static>, InputObjects)> {
+    // TransactionData::validity_check(&transaction)
     transaction
         .validity_check()
         .map_err(SuiError::into_transaction_input_error)?;
