@@ -16,7 +16,7 @@ import {
   tuple,
 } from 'superstruct';
 import { SuiEvent } from './events';
-import { SuiMovePackage, SuiObject, SuiObjectRef } from './objects';
+import { SuiGasData, SuiMovePackage, SuiObject, SuiObjectRef } from './objects';
 import {
   ObjectId,
   ObjectOwner,
@@ -107,10 +107,7 @@ export type SuiTransactionKind = Infer<typeof SuiTransactionKind>;
 export const SuiTransactionData = object({
   transactions: array(SuiTransactionKind),
   sender: SuiAddress,
-  gasPayment: SuiObjectRef,
-  // TODO: remove optional after 0.21.0 is released
-  gasPrice: optional(number()),
-  gasBudget: number(),
+  gasData: SuiGasData,
 });
 export type SuiTransactionData = Infer<typeof SuiTransactionData>;
 

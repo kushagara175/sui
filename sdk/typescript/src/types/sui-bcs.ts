@@ -242,17 +242,25 @@ export type TransactionKind =
   | { Batch: Transaction[] };
 
 /**
+ * The GasData to be used in the transaction.
+ */
+export type GasData = {
+  gasPayment: SuiObjectRef;
+  gasOwner: string; // Gas Object's owner
+  gasPrice: number;
+  gasBudget: number;
+};
+
+/**
  * The TransactionData to be signed and sent to the RPC service.
  *
  * Field `sender` is made optional as it can be added during the signing
  * process and there's no need to define it sooner.
  */
 export type TransactionData = {
-  sender?: string; //
-  gasBudget: number;
-  gasPrice: number;
+  sender?: string;
   kind: TransactionKind;
-  gasPayment: SuiObjectRef;
+  gasData: GasData;
 };
 
 export const TRANSACTION_DATA_TYPE_TAG = Array.from('TransactionData::').map(
@@ -405,10 +413,19 @@ const BCS_SPEC = {
     struct: {
       kind: 'TransactionKind',
       sender: 'address',
+      gasData: 'GasData',
+      // gasPrice: 'u64',
+      // gasBudget: 'u64',
+    },
+  },
+
+  GasData: {
+    struct: {
       gasPayment: 'SuiObjectRef',
+      gasOwner: 'address',
       gasPrice: 'u64',
       gasBudget: 'u64',
-    },
+    }
   },
 
   // Signed transaction data needed to generate transaction digest.

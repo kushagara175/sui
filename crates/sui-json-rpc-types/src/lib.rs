@@ -1528,13 +1528,23 @@ impl From<PayAllSui> for SuiPayAllSui {
 }
 
 #[derive(Debug, Deserialize, Serialize, JsonSchema, Clone)]
+#[serde(rename = "GasData", rename_all = "camelCase")]
+pub struct SuiGasData {
+    pub gas_payment: SuiObjectRef,
+    pub gas_owner: SuiAddress,
+    pub gas_price: u64,
+    pub gas_budget: u64,
+}
+
+#[derive(Debug, Deserialize, Serialize, JsonSchema, Clone)]
 #[serde(rename = "TransactionData", rename_all = "camelCase")]
 pub struct SuiTransactionData {
     pub transactions: Vec<SuiTransactionKind>,
     pub sender: SuiAddress,
-    pub gas_payment: SuiObjectRef,
-    pub gas_price: u64,
-    pub gas_budget: u64,
+    pub gas_data: SuiGasData,
+    // pub gas_payment: SuiObjectRef,
+    // pub gas_price: u64,
+    // pub gas_budget: u64,
 }
 
 impl Display for SuiTransactionData {
@@ -1550,9 +1560,10 @@ impl Display for SuiTransactionData {
             }
         }
         writeln!(writer, "Sender: {}", self.sender)?;
-        writeln!(writer, "Gas Payment: {}", self.gas_payment)?;
-        writeln!(writer, "Gas Price: {}", self.gas_price)?;
-        writeln!(writer, "Gas Budget: {}", self.gas_budget)?;
+        writeln!(writer, "Gas Payment: {}", self.gas_data.gas_payment)?;
+        writeln!(writer, "Gas Owner: {}", self.gas_data.gas_owner)?;
+        writeln!(writer, "Gas Price: {}", self.gas_data.gas_price)?;
+        writeln!(writer, "Gas Budget: {}", self.gas_data.gas_budget)?;
         write!(f, "{}", writer)
     }
 }
@@ -1573,9 +1584,12 @@ impl TryFrom<TransactionData> for SuiTransactionData {
         Ok(Self {
             transactions,
             sender: data.signer(),
-            gas_payment: data.gas().into(),
-            gas_price: data.gas_price,
-            gas_budget: data.gas_budget,
+            gas_data: SuiGasData {
+                gas_payment: data.gas().into(),
+                gas_owner: data.gas_owner(),
+                gas_price: data.gas_price(),
+                gas_budget: data.gas_budget(),
+            },
         })
     }
 }

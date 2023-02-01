@@ -32,11 +32,12 @@ async fn get_gas_status(
     };
     let extra_gas_object_refs = gas_object_refs.into_iter().skip(1).collect();
 
+    // FIXME check gas ownership here
     check_gas(
         store,
         gas_object_ref,
-        transaction.gas_budget,
-        transaction.gas_price,
+        transaction.gas_budget(),
+        transaction.gas_price(),
         &transaction.kind,
         extra_gas_object_refs,
     )

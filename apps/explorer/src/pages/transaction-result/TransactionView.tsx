@@ -539,7 +539,7 @@ function TransactionView({
                                         noTruncate
                                         objectId={
                                             transaction.certificate.data
-                                                .gasPayment.objectId
+                                                .gasData.gasPayment.objectId
                                         }
                                     />
                                 </DescriptionItem>
@@ -548,7 +548,7 @@ function TransactionView({
                                     <GasAmount
                                         amount={
                                             transaction.certificate.data
-                                                .gasBudget * gasPrice
+                                                .gasData.gasBudget * gasPrice
                                         }
                                     />
                                 </DescriptionItem>

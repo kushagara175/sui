@@ -459,6 +459,7 @@ fn test_digest_caching() {
         .data_mut_for_testing()
         .intent_message
         .value
+        .gas_data
         .gas_budget += 1;
 
     // digest is cached
@@ -517,7 +518,7 @@ fn test_user_signature_committed_in_transactions() {
     );
 
     let mut tx_data_2 = tx_data.clone();
-    tx_data_2.gas_budget += 1;
+    tx_data_2.gas_data.gas_budget += 1;
 
     let transaction_a =
         Transaction::from_data_and_signer(tx_data.clone(), Intent::default(), &sender_sec);

@@ -662,12 +662,21 @@ impl Display for TransactionKind {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
+pub struct GasData {
+    pub gas_payment: ObjectRef,
+    pub gas_owner: SuiAddress,
+    pub gas_price: u64,
+    pub gas_budget: u64,
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
 pub struct TransactionData {
     pub kind: TransactionKind,
     sender: SuiAddress,
-    gas_payment: ObjectRef,
-    pub gas_price: u64,
-    pub gas_budget: u64,
+    gas_data: GasData,
+    // gas_payment: ObjectRef,
+    // pub gas_price: u64,
+    // pub gas_budget: u64,
 }
 
 impl TransactionData {
@@ -680,12 +689,15 @@ impl TransactionData {
         TransactionData {
             kind,
             sender,
-            gas_price: DUMMY_GAS_PRICE,
-            gas_payment,
-            gas_budget,
+            gas_data: GasData {
+                gas_price: DUMMY_GAS_PRICE,
+                gas_owner: sender,
+                gas_payment,
+                gas_budget,
+            },
         }
     }
-
+    // FIX all new function to allow to take a gas owner
     pub fn new(
         kind: TransactionKind,
         sender: SuiAddress,
@@ -696,9 +708,12 @@ impl TransactionData {
         TransactionData {
             kind,
             sender,
-            gas_price,
-            gas_payment,
-            gas_budget,
+            gas_data: GasData {
+                gas_price,
+                gas_owner: sender,
+                gas_payment,
+                gas_budget,
+            },
         }
     }
 
@@ -810,6 +825,8 @@ impl TransactionData {
         Self::new(kind, sender, gas_payment, gas_budget, gas_price)
     }
 
+    // fIXME does not work with pay sui etc
+
     pub fn new_pay_with_dummy_gas_price(
         sender: SuiAddress,
         coins: Vec<ObjectRef>,
@@ -920,15 +937,27 @@ impl TransactionData {
     }
 
     pub fn gas(&self) -> ObjectRef {
-        self.gas_payment
+        self.gas_data.gas_payment
     }
 
     pub fn signer(&self) -> SuiAddress {
         self.sender
     }
 
+    pub fn gas_owner(&self) -> SuiAddress {
+        self.gas_data.gas_owner
+    }
+
     pub fn gas_payment_object_ref(&self) -> &ObjectRef {
-        &self.gas_payment
+        &self.gas_data.gas_payment
+    }
+
+    pub fn gas_price(&self) -> u64 {
+        self.gas_data.gas_price
+    }
+
+    pub fn gas_budget(&self) -> u64 {
+        self.gas_data.gas_budget
     }
 
     pub fn contains_shared_object(&self) -> bool {
@@ -961,7 +990,7 @@ impl TransactionData {
     }
 
     pub fn validity_check(&self) -> SuiResult {
-        Self::validity_check_impl(&self.kind, &self.gas_payment)
+        Self::validity_check_impl(&self.kind, self.gas_payment_object_ref())
     }
 
     pub fn validity_check_impl(kind: &TransactionKind, gas_payment: &ObjectRef) -> SuiResult {

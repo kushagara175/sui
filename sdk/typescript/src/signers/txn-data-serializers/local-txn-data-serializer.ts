@@ -19,6 +19,8 @@ import {
   deserializeTransactionBytesToTransactionData,
   normalizeSuiObjectId,
   bcsForVersion,
+  GasData,
+  SuiGasData,
 } from '../../types';
 import {
   MoveCallTransaction,
@@ -38,6 +40,7 @@ import {
 import { Provider } from '../../providers/provider';
 import { CallArgSerializer } from './call-arg-serializer';
 import { TypeTagSerializer } from './type-tag-serializer';
+import { sign } from '@noble/secp256k1';
 
 export class LocalTxnDataSerializer implements TxnDataSerializer {
   /**
@@ -357,10 +360,13 @@ export class LocalTxnDataSerializer implements TxnDataSerializer {
     }
     return {
       kind: tx,
-      gasPayment: gasPayment!,
-      gasPrice: originalTx.data.gasPrice!,
-      gasBudget: originalTx.data.gasBudget!,
       sender: signerAddress,
+      gasData: {
+        gasPayment: gasPayment!,
+        gasPrice: originalTx.data.gasPrice!,
+        gasBudget: originalTx.data.gasBudget!,
+        gasOwner: signerAddress,
+      }
     };
   }
 
@@ -418,18 +424,20 @@ export class LocalTxnDataSerializer implements TxnDataSerializer {
     if ('Single' in tx.kind) {
       return this.transformTransactionToSignableTransaction(
         tx.kind.Single,
-        tx.gasBudget,
-        tx.gasPayment,
-        tx.gasPrice
+        tx.gasData,
+        // tx.gasBudget,
+        // tx.gasPayment,
+        // tx.gasPrice
       );
     }
     return Promise.all(
       tx.kind.Batch.map((t) =>
         this.transformTransactionToSignableTransaction(
           t,
-          tx.gasBudget,
-          tx.gasPayment,
-          tx.gasPrice
+          tx.gasData,
+          // tx.gasBudget,
+          // tx.gasPayment,
+          // tx.gasPrice
         )
       )
     );
@@ -437,9 +445,10 @@ export class LocalTxnDataSerializer implements TxnDataSerializer {
 
   public async transformTransactionToSignableTransaction(
     tx: Transaction,
-    gasBudget: number,
-    gasPayment?: SuiObjectRef,
-    gasPrice?: number
+    gasData: GasData,
+    // gasBudget: number,
+    // gasPayment?: SuiObjectRef,
+    // gasPrice?: number
   ): Promise<UnserializedSignableTransaction> {
     if ('Pay' in tx) {
       return {
@@ -448,9 +457,10 @@ export class LocalTxnDataSerializer implements TxnDataSerializer {
           inputCoins: tx.Pay.coins.map((c) => c.objectId),
           recipients: tx.Pay.recipients,
           amounts: tx.Pay.amounts,
-          gasPayment: gasPayment?.objectId,
-          gasBudget,
-          gasPrice,
+          gasPayment: gasData.gasPayment?.objectId,
+          gasBudget: gasData.gasBudget,
+          gasOwner: gasData.gasOwner,
+          gasPrice: gasData.gasPrice,
         },
       };
     } else if ('Call' in tx) {
@@ -469,9 +479,10 @@ export class LocalTxnDataSerializer implements TxnDataSerializer {
           arguments: await new CallArgSerializer(
             this.provider
           ).deserializeCallArgs(tx),
-          gasPayment: gasPayment?.objectId,
-          gasBudget,
-          gasPrice,
+          gasPayment: gasData.gasPayment?.objectId,
+          gasBudget: gasData.gasBudget,
+          gasOwner: gasData.gasOwner,
+          gasPrice: gasData.gasPrice,
         },
       };
     } else if ('TransferObject' in tx) {
@@ -480,21 +491,22 @@ export class LocalTxnDataSerializer implements TxnDataSerializer {
         data: {
           objectId: tx.TransferObject.object_ref.objectId,
           recipient: tx.TransferObject.recipient,
-          gasPayment: gasPayment?.objectId,
-          gasBudget,
-          gasPrice,
+          gasPayment: gasData.gasPayment?.objectId,
+          gasBudget: gasData.gasBudget,
+          gasOwner: gasData.gasOwner,
+          gasPrice: gasData.gasPrice,
         },
       };
     } else if ('TransferSui' in tx) {
       return {
         kind: 'transferSui',
         data: {
-          suiObjectId: gasPayment!.objectId,
+          suiObjectId: gasData.gasPayment!.objectId,
           recipient: tx.TransferSui.recipient,
           amount:
             'Some' in tx.TransferSui.amount ? tx.TransferSui.amount.Some : null,
-          gasBudget,
-          gasPrice,
+          gasBudget: gasData.gasBudget,
+          gasPrice: gasData.gasPrice,
         },
       };
     } else if ('Publish' in tx) {
@@ -502,9 +514,9 @@ export class LocalTxnDataSerializer implements TxnDataSerializer {
         kind: 'publish',
         data: {
           compiledModules: tx.Publish.modules,
-          gasPayment: gasPayment?.objectId,
-          gasBudget,
-          gasPrice,
+          gasPayment: gasData.gasPayment?.objectId,
+          gasBudget: gasData.gasBudget,
+          gasOwner: gasData.gasOwner,
         },
       };
     }

@@ -17,6 +17,8 @@ export interface TransferObjectTransaction extends TransactionCommon {
   objectId: ObjectId;
   recipient: SuiAddress;
   gasPayment?: ObjectId;
+  gasOwner?: SuiAddress;
+  // gasData?: SuiGasData;
 }
 
 export interface TransferSuiTransaction extends TransactionCommon {
@@ -39,6 +41,8 @@ export interface PayTransaction extends TransactionCommon {
   recipients: SuiAddress[];
   amounts: number[];
   gasPayment?: ObjectId;
+  gasOwner?: SuiAddress;
+  // gasData?: SuiGasData;
 }
 
 /// Send SUI coins to a list of addresses, following a list of amounts.
@@ -77,12 +81,16 @@ export interface MergeCoinTransaction extends TransactionCommon {
   primaryCoin: ObjectId;
   coinToMerge: ObjectId;
   gasPayment?: ObjectId;
+  gasOwner?: SuiAddress;
+  // gasData?: SuiGasData;
 }
 
 export interface SplitCoinTransaction extends TransactionCommon {
   coinObjectId: ObjectId;
   splitAmounts: number[];
   gasPayment?: ObjectId;
+  gasOwner?: SuiAddress;
+  // gasData?: SuiGasData;
 }
 
 export interface MoveCallTransaction extends TransactionCommon {
@@ -92,6 +100,8 @@ export interface MoveCallTransaction extends TransactionCommon {
   typeArguments: string[] | TypeTag[];
   arguments: (SuiJsonValue | PureArg)[];
   gasPayment?: ObjectId;
+  gasOwner?: SuiAddress;
+  // gasData?: SuiGasData;
 }
 
 export type UnserializedSignableTransaction =
@@ -167,6 +177,8 @@ export type SignableTransactionData = SignableTransaction['data'];
 export interface PublishTransaction extends TransactionCommon {
   compiledModules: ArrayLike<string> | ArrayLike<ArrayLike<number>>;
   gasPayment?: ObjectId;
+  gasOwner?: SuiAddress;
+  // gasData?: SuiGasData;
 }
 
 export type TransactionBuilderMode = 'Commit' | 'DevInspect';
