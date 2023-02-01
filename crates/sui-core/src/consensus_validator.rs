@@ -164,7 +164,7 @@ mod tests {
         .unwrap();
 
         let metrics = SuiTxValidatorMetrics::new(&Default::default());
-        let validator = SuiTxValidator::new(state.epoch_store().clone(), metrics);
+        let validator = SuiTxValidator::new(state.epoch_store_for_testing().clone(), metrics);
         let res = validator.validate(&first_transaction_bytes);
         assert!(res.is_ok(), "{res:?}");
 
