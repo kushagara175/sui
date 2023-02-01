@@ -106,6 +106,8 @@ pub enum SuiError {
     // Signature verification
     #[error("Signature is not valid: {}", error)]
     InvalidSignature { error: String },
+    #[error("Required Signature from {signer} is absent: {}")]
+    SignerSignatureAbsent { signer: String },
     #[error("Sender Signature must be verified separately from Authority Signature")]
     SenderSigUnbatchable,
     #[error("Value was not signed by the correct sender: {}", error)]
