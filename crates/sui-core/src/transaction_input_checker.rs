@@ -25,6 +25,7 @@ async fn get_gas_status(
 ) -> SuiResult<SuiGasStatus<'static>> {
     let tx_kind = &transaction.kind;
     let gas_object_ref = transaction.gas_payment_object_ref();
+    // FIXME sender needs to be == payer in SUI txes
     let gas_object_refs = match tx_kind {
         TransactionKind::Single(SingleTransactionKind::PaySui(p)) => p.coins.clone(),
         TransactionKind::Single(SingleTransactionKind::PayAllSui(p)) => p.coins.clone(),
@@ -32,7 +33,6 @@ async fn get_gas_status(
     };
     let extra_gas_object_refs = gas_object_refs.into_iter().skip(1).collect();
 
-    // FIXME check gas ownership here
     check_gas(
         store,
         gas_object_ref,
@@ -243,9 +243,16 @@ async fn check_objects(
         if transfer_object_ids.contains(&object.id()) {
             object.ensure_public_transfer_eligible()?;
         }
+        // FIXME add tests
+        // For Gas Object, we check the object is owned by gas owner
+        let owner_address = if object.id() == transaction.gas_payment_object_ref().0 {
+            transaction.gas_owner()
+        } else {
+            transaction.signer()
+        };
         // Check if the object contents match the type of lock we need for
         // this object.
-        match check_one_object(&transaction.signer(), object_kind, &object) {
+        match check_one_object(&owner_address, object_kind, &object) {
             Ok(()) => all_objects.push((object_kind, object)),
             Err(e) => {
                 errors.push(e);

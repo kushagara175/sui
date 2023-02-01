@@ -940,6 +940,10 @@ impl TransactionData {
         self.gas_data.gas_payment
     }
 
+    pub fn gas_data(&self) -> &GasData {
+        &self.gas_data
+    }
+
     pub fn signer(&self) -> SuiAddress {
         self.sender
     }
@@ -990,10 +994,16 @@ impl TransactionData {
     }
 
     pub fn validity_check(&self) -> SuiResult {
-        Self::validity_check_impl(&self.kind, self.gas_payment_object_ref())
+        // Self::validity_check_impl(&self.kind, self.gas_payment_object_ref())
+        Self::validity_check_impl(&self.kind, self.gas_data())
     }
 
-    pub fn validity_check_impl(kind: &TransactionKind, gas_payment: &ObjectRef) -> SuiResult {
+    fn check_sponsorship(kind: &TransactionKind, gas_data: &GasData) -> SuiResult {
+        if matches!()
+    }
+
+    // pub fn validity_check_impl(kind: &TransactionKind, gas_payment: &ObjectRef) -> SuiResult {
+    pub fn validity_check_impl(kind: &TransactionKind, gas_data: &GasData) -> SuiResult {
         fp_ensure!(
             !kind.is_blocked_move_function(),
             SuiError::BlockedMoveFunction
@@ -1039,7 +1049,7 @@ impl TransactionData {
                     fp_ensure!(!p.coins.is_empty(), SuiError::EmptyInputCoins);
                     fp_ensure!(
                         // unwrap() is safe because coins are not empty.
-                        p.coins.first().unwrap() == gas_payment,
+                        p.coins.first().unwrap() == &gas_data.gas_payment,
                         SuiError::UnexpectedGasPaymentObject
                     );
                 }
@@ -1047,7 +1057,7 @@ impl TransactionData {
                     fp_ensure!(!pa.coins.is_empty(), SuiError::EmptyInputCoins);
                     fp_ensure!(
                         // unwrap() is safe because coins are not empty.
-                        pa.coins.first().unwrap() == gas_payment,
+                        pa.coins.first().unwrap() == &gas_data.gas_payment,
                         SuiError::UnexpectedGasPaymentObject
                     );
                 }
