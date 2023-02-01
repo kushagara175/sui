@@ -948,6 +948,15 @@ impl TransactionData {
         self.sender
     }
 
+    /// Transaction signer and Gas owner
+    pub fn signers(&self) -> Vec<&SuiAddress> {
+        let mut signers = vec![&self.sender];
+        if self.gas_owner() != self.sender {
+            signers.push(&self.gas_owner());
+        }
+        signers
+    }
+
     pub fn gas_owner(&self) -> SuiAddress {
         self.gas_data.gas_owner
     }
@@ -1097,14 +1106,14 @@ impl TransactionData {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct SenderSignedData {
     pub intent_message: IntentMessage<TransactionData>,
-    pub tx_signature: Signature,
+    pub tx_signatures: BTreeMap<SuiAddress, Signature>,
 }
 
 impl SenderSignedData {
-    pub fn new(tx_data: TransactionData, intent: Intent, tx_signature: Signature) -> Self {
+    pub fn new(tx_data: TransactionData, intent: Intent, tx_signatures: BTreeMap<SuiAddress, Signature>) -> Self {
         Self {
             intent_message: IntentMessage::new(intent, tx_data),
-            tx_signature,
+            tx_signatures,
         }
     }
 }
@@ -1120,8 +1129,29 @@ impl Message for SenderSignedData {
         if self.intent_message.value.kind.is_system_tx() {
             return Ok(());
         }
-        self.tx_signature
-            .verify_secure(&self.intent_message, self.intent_message.value.sender)
+
+        // Verify signatures. Steps are ordered in asc complexity order.
+        let signers = self.intent_message.value.signers();
+        // All required signers need to be present.
+        for s in &signers {
+            if !self.tx_signatures.contains_key(s)  {
+                return Err(SuiError::SignerSigAbsent);
+            }
+        }
+        // Signatures do not come from irrelevant parties.
+        fp_ensure!(
+            self.tx_signatures.len() == signers.len(),
+            SuiError::MoreSignatureThanExpected,
+        );
+        // if !signers.iter().all(|s| self.tx_signatures.contains_key(s)) {
+        //     return Err(SuiError::)
+        // }
+        // Verify all signatures.
+        for (signer, signature) in &self.tx_signatures {
+            signature
+                .verify_secure(&self.intent_message, *signer)?;
+        }
+        Ok(())
     }
 }
 
