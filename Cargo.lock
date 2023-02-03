@@ -9360,6 +9360,7 @@ dependencies = [
  "bencher",
  "bincode",
  "byteorder",
+ "criterion",
  "derive_more",
  "enum_dispatch",
  "eyre",
