@@ -133,11 +133,11 @@ pub async fn test_checkpoint_executor_cross_epoch() {
     );
 
     // sync end of epoch checkpoint
-    let last_executed_checkpoint_1 = cold_start_checkpoints.last().cloned().unwrap();
-    let (end_of_epoch_checkpoint, second_committee) = sync_end_of_epoch_checkpoint(
+    let last_executed_checkpoint = cold_start_checkpoints.last().cloned().unwrap();
+    let (end_of_epoch_0_checkpoint, second_committee) = sync_end_of_epoch_checkpoint(
         &checkpoint_store,
         &checkpoint_sender,
-        last_executed_checkpoint_1.clone(),
+        last_executed_checkpoint.clone(),
         &first_committee,
     );
 
@@ -146,16 +146,16 @@ pub async fn test_checkpoint_executor_cross_epoch() {
         &checkpoint_store,
         &checkpoint_sender,
         num_to_sync_per_epoch,
-        Some(end_of_epoch_checkpoint),
+        Some(end_of_epoch_0_checkpoint.clone()),
         &second_committee,
     );
 
     // sync end of epoch checkpoint
-    let last_executed_checkpoint_2 = next_epoch_checkpoints.last().cloned().unwrap();
-    let (_end_of_epoch_checkpoint, _third_committee) = sync_end_of_epoch_checkpoint(
+    let last_executed_checkpoint = next_epoch_checkpoints.last().cloned().unwrap();
+    let (end_of_epoch_1_checkpoint, _third_committee) = sync_end_of_epoch_checkpoint(
         &checkpoint_store,
         &checkpoint_sender,
-        last_executed_checkpoint_2.clone(),
+        last_executed_checkpoint.clone(),
         &second_committee,
     );
 
@@ -177,10 +177,11 @@ pub async fn test_checkpoint_executor_cross_epoch() {
     .unwrap();
 
     let first_epoch = 0;
+
     accumulator
         .digest_epoch(
             &first_epoch,
-            last_executed_checkpoint_1.sequence_number(),
+            end_of_epoch_0_checkpoint.sequence_number(),
             authority_state.epoch_store().clone(),
         )
         .unwrap();
@@ -226,10 +227,12 @@ pub async fn test_checkpoint_executor_cross_epoch() {
     );
 
     let second_epoch = 1;
+    assert!(second_epoch == authority_state.epoch());
+
     accumulator
         .digest_epoch(
             &second_epoch,
-            last_executed_checkpoint_2.sequence_number(),
+            end_of_epoch_1_checkpoint.sequence_number(),
             authority_state.epoch_store().clone(),
         )
         .unwrap();

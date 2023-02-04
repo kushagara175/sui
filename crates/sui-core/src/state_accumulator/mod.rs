@@ -115,7 +115,7 @@ impl StateAccumulator {
 
         // Get the next checkpoint to accumulate (first checkpoint of the epoch)
         // by adding 1 to the highest checkpoint of the previous epoch
-        let (epoch, (next_to_accumulate, mut root_state_hash)) = self
+        let (_, (next_to_accumulate, mut root_state_hash)) = self
             .authority_store
             .perpetual_tables
             .root_state_hash_by_epoch
@@ -135,10 +135,16 @@ impl StateAccumulator {
             root_state_hash.union(&acc);
         }
 
+        // TODO(william) the below two operations should be done in a single
+        // database transaction
         self.authority_store
             .perpetual_tables
             .root_state_hash_by_epoch
             .insert(&epoch, &(last_checkpoint_of_epoch, root_state_hash.clone()))?;
+
+        self.authority_store
+            .root_state_notify_read
+            .notify(&epoch, &(last_checkpoint_of_epoch, root_state_hash.clone()));
 
         Ok(root_state_hash)
     }

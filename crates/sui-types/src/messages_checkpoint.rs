@@ -1,7 +1,6 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-use fastcrypto::encoding::{Base58, Encoding, Hex};
 use fastcrypto::hash::Digest;
 use std::fmt::{Debug, Display, Formatter};
 use std::slice::Iter;
