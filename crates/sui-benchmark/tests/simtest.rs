@@ -224,7 +224,7 @@ mod test {
             proxy_gas_and_coins,
             num_workers,
             system_state_observer.clone(),
-            chunk_size,
+            1000,
         )
         .await
         .unwrap();
