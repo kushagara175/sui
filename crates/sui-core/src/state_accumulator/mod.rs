@@ -17,12 +17,6 @@ use typed_store::rocks::TypedStoreError;
 use crate::authority::authority_per_epoch_store::AuthorityPerEpochStore;
 use crate::authority::AuthorityStore;
 
-#[derive(Debug, Clone)]
-pub struct State {
-    pub effects: Vec<TransactionEffects>,
-    pub checkpoint_seq_num: CheckpointSequenceNumber,
-}
-
 pub struct StateAccumulator {
     authority_store: Arc<AuthorityStore>,
 }
@@ -34,18 +28,18 @@ impl StateAccumulator {
 
     pub fn accumulate_checkpoint(
         &self,
-        state: State,
+        effects: Vec<TransactionEffects>,
+        checkpoint_seq_num: CheckpointSequenceNumber,
         epoch_store: Arc<AuthorityPerEpochStore>,
     ) -> SuiResult<Accumulator> {
-        if let Some(acc) = epoch_store.get_state_hash_for_checkpoint(&state.checkpoint_seq_num)? {
+        if let Some(acc) = epoch_store.get_state_hash_for_checkpoint(&checkpoint_seq_num)? {
             return Ok(acc);
         }
 
         let mut acc = Accumulator::default();
 
         acc.insert_all(
-            state
-                .effects
+            effects
                 .iter()
                 .flat_map(|fx| {
                     fx.created
@@ -57,8 +51,7 @@ impl StateAccumulator {
                 .collect::<Vec<ObjectDigest>>(),
         );
         acc.remove_all(
-            state
-                .effects
+            effects
                 .iter()
                 .flat_map(|fx| {
                     fx.deleted
@@ -69,10 +62,13 @@ impl StateAccumulator {
                 })
                 .collect::<Vec<ObjectDigest>>(),
         );
+
         // TODO almost certainly not currectly handling "mutated" effects.
+        // TODO(william) the below two operations should be done
+        // atomically, otherwise we may have infinite awaits on the notify
+        // in a crash scenario.
         acc.insert_all(
-            state
-                .effects
+            effects
                 .iter()
                 .flat_map(|fx| {
                     fx.mutated
@@ -84,11 +80,11 @@ impl StateAccumulator {
                 .collect::<Vec<ObjectDigest>>(),
         );
 
-        epoch_store.insert_state_hash_for_checkpoint(&state.checkpoint_seq_num, &acc)?;
+        epoch_store.insert_state_hash_for_checkpoint(&checkpoint_seq_num, &acc)?;
 
         epoch_store
             .checkpoint_state_notify_read
-            .notify(&state.checkpoint_seq_num, &acc);
+            .notify(&checkpoint_seq_num, &acc);
 
         Ok(acc)
     }
@@ -122,21 +118,28 @@ impl StateAccumulator {
             .iter()
             .skip_to_last()
             .next()
-            .map(|(epoch, (highest, hash))| (epoch, (highest.saturating_add(1), hash)))
+            .map(|(epoch, (highest, hash))| {
+                (
+                    epoch,
+                    (
+                        highest.checked_add(1).expect("Overflowed u64 for epoch ID"),
+                        hash,
+                    ),
+                )
+            })
             .unwrap_or((0, (0, Accumulator::default())));
 
-        for i in next_to_accumulate..=last_checkpoint_of_epoch {
-            let acc = epoch_store
-                .get_state_hash_for_checkpoint(&i)
-                .unwrap()
-                .unwrap_or_else(|| {
-                    panic!("Accumulator for checkpoint sequence number {i:?} not present in store")
-                });
+        let accumulators = epoch_store
+            .get_accumulators_in_checkpoint_range(next_to_accumulate, last_checkpoint_of_epoch)?;
+        assert!(accumulators.len() == (last_checkpoint_of_epoch - next_to_accumulate + 1) as usize);
+
+        for acc in accumulators {
             root_state_hash.union(&acc);
         }
 
-        // TODO(william) the below two operations should be done in a single
-        // database transaction
+        // TODO(william) the below two operations should be done
+        // atomically, otherwise we may have infinite awaits on the notify
+        // in a crash scenario.
         self.authority_store
             .perpetual_tables
             .root_state_hash_by_epoch

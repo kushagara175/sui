@@ -498,6 +498,21 @@ impl AuthorityPerEpochStore {
             .map_err(SuiError::from)
     }
 
+    pub fn get_accumulators_in_checkpoint_range(
+        &self,
+        from_checkpoint: CheckpointSequenceNumber,
+        to_checkpoint: CheckpointSequenceNumber,
+    ) -> Result<Vec<Accumulator>, TypedStoreError> {
+        Ok(self
+            .tables
+            .state_hash_by_checkpoint
+            .iter()
+            .skip_to(&from_checkpoint)?
+            .take_while(|(checkpoint, _)| *checkpoint <= to_checkpoint)
+            .map(|(_, acc)| acc)
+            .collect())
+    }
+
     pub fn get_transactions_in_checkpoint_range(
         &self,
         from_height_excluded: Option<u64>,

@@ -14,7 +14,7 @@ pub use crate::checkpoints::checkpoint_output::{
 };
 pub use crate::checkpoints::metrics::CheckpointMetrics;
 use crate::stake_aggregator::{InsertResult, StakeAggregator};
-use crate::state_accumulator::{State, StateAccumulator};
+use crate::state_accumulator::StateAccumulator;
 use futures::future::{select, Either};
 use futures::FutureExt;
 use mysten_metrics::{monitored_scope, spawn_monitored_task, MonitoredFutureExt};
@@ -616,12 +616,11 @@ impl CheckpointBuilder {
             }
 
             let root_state_digest = if last_checkpoint_of_epoch {
-                let state = State {
-                    effects: effects.clone(),
-                    checkpoint_seq_num: sequence_number,
-                };
-                self.accumulator
-                    .accumulate_checkpoint(state, self.epoch_store.clone())?;
+                self.accumulator.accumulate_checkpoint(
+                    effects.clone(),
+                    sequence_number,
+                    self.epoch_store.clone(),
+                )?;
 
                 Some(self.accumulator.digest_epoch(
                     &epoch,
