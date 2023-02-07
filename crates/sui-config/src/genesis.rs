@@ -26,6 +26,7 @@ use sui_types::crypto::{
 };
 use sui_types::gas::SuiGasStatus;
 use sui_types::in_memory_storage::InMemoryStorage;
+use sui_types::intent::{Intent, IntentMessage, IntentScope};
 use sui_types::message_envelope::Message;
 use sui_types::messages::{CallArg, TransactionEffects};
 use sui_types::messages::{CertifiedTransaction, Transaction};
@@ -357,7 +358,11 @@ impl Builder {
             "provided keypair does not correspond to a validator in the validator set"
         );
         let checkpoint_signature = {
-            let signature = AuthoritySignature::new(&checkpoint, checkpoint.epoch, keypair);
+            let intent_msg = IntentMessage::new(
+                Intent::default().with_scope(IntentScope::Checkpoint),
+                checkpoint.clone(),
+            );
+            let signature = AuthoritySignature::new_secure(&intent_msg, &checkpoint.epoch, keypair);
             AuthoritySignInfo {
                 epoch: checkpoint.epoch,
                 authority: name,
@@ -365,10 +370,15 @@ impl Builder {
             }
         };
 
-        let transaction_signature =
-            SignedTransaction::new(checkpoint.epoch, transaction.into_data(), keypair, name)
-                .auth_sig()
-                .clone();
+        let transaction_signature = SignedTransaction::new(
+            checkpoint.epoch,
+            transaction.into_data(),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
+            keypair,
+            name,
+        )
+        .auth_sig()
+        .clone();
 
         self.signatures
             .insert(name, (checkpoint_signature, transaction_signature));

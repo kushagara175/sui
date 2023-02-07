@@ -1189,6 +1189,7 @@ mod tests {
     use fastcrypto::traits::KeyPair;
     use std::collections::HashMap;
     use sui_types::crypto::Signature;
+    use sui_types::intent::{Intent, IntentScope};
     use sui_types::messages::{SignedTransactionEffects, TrustedSignedTransactionEffects};
     use sui_types::messages_checkpoint::SignedCheckpointSummary;
     use tempfile::tempdir;
@@ -1423,6 +1424,7 @@ mod tests {
         VerifiedSignedTransactionEffects::new_unchecked(SignedTransactionEffects::new(
             state.epoch_store_for_testing().epoch(),
             effects,
+            Intent::default().with_scope(IntentScope::TransactionEffects),
             &*state.secret,
             state.name,
         ))

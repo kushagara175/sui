@@ -9,7 +9,7 @@ use crate::crypto::{
     Ed25519SuiSignature, EmptySignInfo, Signature, SuiSignature, SuiSignatureInner, ToFromBytes,
 };
 use crate::gas::GasCostSummary;
-use crate::intent::{Intent, IntentMessage};
+use crate::intent::{Intent, IntentMessage, IntentScope};
 use crate::message_envelope::{Envelope, Message, TrustedEnvelope, VerifiedEnvelope};
 use crate::messages_checkpoint::{CheckpointSequenceNumber, CheckpointSignatureMessage};
 use crate::object::{MoveObject, Object, ObjectFormatOptions, Owner, PACKAGE_VERSION};
@@ -1220,6 +1220,7 @@ impl VerifiedSignedTransaction {
         Self::new_from_verified(SignedTransaction::new(
             epoch,
             transaction.into_inner().into_data(),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
             secret,
             authority,
         ))

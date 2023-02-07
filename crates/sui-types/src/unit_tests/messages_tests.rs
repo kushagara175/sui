@@ -72,6 +72,7 @@ fn test_signed_values() {
     let v = SignedTransaction::new(
         committee.epoch(),
         transaction.clone().into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec1,
         AuthorityPublicKeyBytes::from(sec1.public()),
     );
@@ -80,6 +81,7 @@ fn test_signed_values() {
     let v = SignedTransaction::new(
         committee.epoch(),
         transaction.clone().into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec2,
         AuthorityPublicKeyBytes::from(sec2.public()),
     );
@@ -88,6 +90,7 @@ fn test_signed_values() {
     let v = SignedTransaction::new(
         committee.epoch(),
         transaction.into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec3,
         AuthorityPublicKeyBytes::from(sec3.public()),
     );
@@ -96,6 +99,7 @@ fn test_signed_values() {
     let v = SignedTransaction::new(
         committee.epoch(),
         bad_transaction.into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec1,
         AuthorityPublicKeyBytes::from(sec1.public()),
     );
@@ -137,18 +141,21 @@ fn test_certificates() {
     let v1 = SignedTransaction::new(
         committee.epoch(),
         transaction.clone().into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec1,
         AuthorityPublicKeyBytes::from(sec1.public()),
     );
     let v2 = SignedTransaction::new(
         committee.epoch(),
         transaction.clone().into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec2,
         AuthorityPublicKeyBytes::from(sec2.public()),
     );
     let v3 = SignedTransaction::new(
         committee.epoch(),
         transaction.clone().into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec3,
         AuthorityPublicKeyBytes::from(sec3.public()),
     );
@@ -179,7 +186,13 @@ fn test_new_with_signatures() {
     for _ in 0..5 {
         let (_, sec): (_, AuthorityKeyPair) = get_key_pair();
         let name = AuthorityPublicKeyBytes::from(sec.public());
-        signatures.push(AuthoritySignInfo::new(0, &message, name, &sec));
+        signatures.push(AuthoritySignInfo::new(
+            0,
+            &message,
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
+            name,
+            &sec,
+        ));
         authorities.insert(name, 1);
     }
     let (_, sec): (_, AuthorityKeyPair) = get_key_pair();
@@ -225,6 +238,7 @@ fn test_handle_reject_malicious_signature() {
             signatures.push(AuthoritySignInfo::new(
                 0,
                 &Foo("some data".to_string()),
+                Intent::default().with_scope(IntentScope::SenderSignedTransaction),
                 name,
                 &sec,
             ))
@@ -236,7 +250,11 @@ fn test_handle_reject_malicious_signature() {
         AuthorityStrongQuorumSignInfo::new_from_auth_sign_infos(signatures, &committee).unwrap();
     {
         let (_, sec): (_, AuthorityKeyPair) = get_key_pair();
-        let sig = AuthoritySignature::new(&message, committee.epoch, &sec);
+        let sig = AuthoritySignature::new_secure(
+            &IntentMessage::new(Intent::default(), message.clone()),
+            &committee.epoch,
+            &sec,
+        );
         quorum.signature.add_signature(sig).unwrap();
     }
     let (mut obligation, idx) = get_obligation_input(&message);
@@ -259,6 +277,7 @@ fn test_auth_sig_commit_to_wrong_epoch_id_fail() {
         signatures.push(AuthoritySignInfo::new(
             1,
             &Foo("some data".to_string()),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
             name,
             &sec,
         ));
@@ -270,7 +289,11 @@ fn test_auth_sig_commit_to_wrong_epoch_id_fail() {
     {
         let (_, sec): (_, AuthorityKeyPair) = get_key_pair();
         // signature commits to epoch 0
-        let sig = AuthoritySignature::new(&message, 1, &sec);
+        let sig = AuthoritySignature::new_secure(
+            &IntentMessage::new(Intent::default(), message.clone()),
+            &1,
+            &sec,
+        );
         quorum.signature.add_signature(sig).unwrap();
     }
     let (mut obligation, idx) = get_obligation_input(&message);
@@ -297,6 +320,7 @@ fn test_bitmap_out_of_range() {
         signatures.push(AuthoritySignInfo::new(
             0,
             &Foo("some data".to_string()),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
             name,
             &sec,
         ));
@@ -328,6 +352,7 @@ fn test_reject_extra_public_key() {
         signatures.push(AuthoritySignInfo::new(
             0,
             &Foo("some data".to_string()),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
             name,
             &sec,
         ));
@@ -367,6 +392,7 @@ fn test_reject_reuse_signatures() {
         signatures.push(AuthoritySignInfo::new(
             0,
             &Foo("some data".to_string()),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
             name,
             &sec,
         ));
@@ -402,6 +428,7 @@ fn test_empty_bitmap() {
         signatures.push(AuthoritySignInfo::new(
             0,
             &Foo("some data".to_string()),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
             name,
             &sec,
         ));
@@ -450,6 +477,7 @@ fn test_digest_caching() {
     let mut signed_tx = SignedTransaction::new(
         committee.epoch(),
         transaction.into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec1,
         AuthorityPublicKeyBytes::from(sec1.public()),
     );
@@ -482,6 +510,7 @@ fn test_digest_caching() {
     let mut signed_effects = SignedTransactionEffects::new(
         committee.epoch(),
         effects,
+        Intent::default().with_scope(IntentScope::TransactionData),
         &sec1,
         AuthorityPublicKeyBytes::from(sec1.public()),
     );
@@ -579,12 +608,14 @@ fn test_user_signature_committed_in_signed_transactions() {
     let signed_tx_a = SignedTransaction::new(
         0,
         transaction_a.clone().into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec1,
         AuthorityPublicKeyBytes::from(sec1.public()),
     );
     let signed_tx_b = SignedTransaction::new(
         0,
         transaction_b.clone().into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec1,
         AuthorityPublicKeyBytes::from(sec1.public()),
     );
@@ -663,6 +694,7 @@ fn verify_sender_signature_correctly_with_flag() {
     let signed_tx = SignedTransaction::new(
         committee.epoch(),
         transaction.clone().into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec1,
         AuthorityPublicKeyBytes::from(sec1.public()),
     );
@@ -687,6 +719,7 @@ fn verify_sender_signature_correctly_with_flag() {
     let signed_tx_1 = SignedTransaction::new(
         committee.epoch(),
         transaction_1.clone().into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec1,
         AuthorityPublicKeyBytes::from(sec1.public()),
     );
@@ -720,6 +753,7 @@ fn verify_sender_signature_correctly_with_flag() {
     let signed_tx_3 = SignedTransaction::new(
         committee.epoch(),
         verified_tx_3.into_message(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
         &sec1,
         AuthorityPublicKeyBytes::from(sec1.public()),
     );

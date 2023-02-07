@@ -3,6 +3,7 @@
 
 use std::collections::HashMap;
 use sui_types::crypto::AuthorityStrongQuorumSignInfo;
+use sui_types::intent::{Intent, IntentMessage, IntentScope};
 use sui_types::{
     base_types::AuthorityName,
     committee::{Committee, EpochId, StakeUnit},
@@ -74,7 +75,11 @@ impl CommitteeFixture {
             .validators
             .iter()
             .map(|(name, (key, _))| {
-                let signature = AuthoritySignature::new(&checkpoint, checkpoint.epoch, key);
+                let intent_msg = IntentMessage::new(
+                    Intent::default().with_scope(IntentScope::CheckpointSummary),
+                    checkpoint.clone(),
+                );
+                let signature = AuthoritySignature::new_secure(&intent_msg, &checkpoint.epoch, key);
                 AuthoritySignInfo {
                     epoch: checkpoint.epoch,
                     authority: *name,

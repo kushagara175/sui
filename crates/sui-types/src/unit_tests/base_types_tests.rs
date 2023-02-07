@@ -15,6 +15,7 @@ use crate::crypto::{
     get_key_pair, get_key_pair_from_bytes, AccountKeyPair, AuthorityKeyPair, AuthoritySignature,
     Signature, SuiAuthoritySignature, SuiSignature,
 };
+use crate::intent::{Intent, IntentMessage};
 use crate::{gas_coin::GasCoin, object::Object, SUI_FRAMEWORK_ADDRESS};
 
 use super::*;
@@ -301,7 +302,11 @@ fn test_transaction_digest_serde_human_readable() {
 #[test]
 fn test_authority_signature_serde_not_human_readable() {
     let (_, key): (_, AuthorityKeyPair) = get_key_pair();
-    let sig = AuthoritySignature::new(&Foo("some data".to_string()), 0, &key);
+    let sig = AuthoritySignature::new_secure(
+        &IntentMessage::new(Intent::default(), Foo("some data".to_string())),
+        &0,
+        &key,
+    );
     let serialized = bincode::serialize(&sig).unwrap();
     let bcs_serialized = bcs::to_bytes(&sig).unwrap();
 
@@ -313,7 +318,11 @@ fn test_authority_signature_serde_not_human_readable() {
 #[test]
 fn test_authority_signature_serde_human_readable() {
     let (_, key): (_, AuthorityKeyPair) = get_key_pair();
-    let sig = AuthoritySignature::new(&Foo("some data".to_string()), 0, &key);
+    let sig = AuthoritySignature::new_secure(
+        &IntentMessage::new(Intent::default(), Foo("some data".to_string())),
+        &0,
+        &key,
+    );
     let serialized = serde_json::to_string(&sig).unwrap();
     assert_eq!(
         format!(r#"{{"sig":"{}"}}"#, sig.encode_base64()),

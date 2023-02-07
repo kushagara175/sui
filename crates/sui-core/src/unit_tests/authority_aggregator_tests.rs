@@ -15,6 +15,8 @@ use sui_types::crypto::{
     get_authority_key_pair, get_key_pair, AccountKeyPair, AuthorityKeyPair, AuthorityPublicKeyBytes,
 };
 use sui_types::crypto::{KeypairTraits, Signature};
+use sui_types::intent::Intent;
+use sui_types::intent::IntentScope;
 use test_utils::sui_system_state::{test_sui_system_state, test_validator};
 
 use sui_macros::sim_test;
@@ -958,7 +960,13 @@ fn sign_tx(
     authority: AuthorityName,
     secret: &dyn signature::Signer<AuthoritySignature>,
 ) -> SignedTransaction {
-    SignedTransaction::new(epoch, tx.into_inner().into_data(), secret, authority)
+    SignedTransaction::new(
+        epoch,
+        tx.into_inner().into_data(),
+        Intent::default().with_scope(IntentScope::SenderSignedTransaction),
+        secret,
+        authority,
+    )
 }
 
 fn sign_tx_effects(
@@ -967,7 +975,13 @@ fn sign_tx_effects(
     authority: AuthorityName,
     secret: &dyn signature::Signer<AuthoritySignature>,
 ) -> SignedTransactionEffects {
-    SignedTransactionEffects::new(epoch, effects, secret, authority)
+    SignedTransactionEffects::new(
+        epoch,
+        effects,
+        Intent::default().with_scope(IntentScope::TransactionEffects),
+        secret,
+        authority,
+    )
 }
 
 #[tokio::test]
@@ -1217,7 +1231,13 @@ fn set_tx_info_response_with_cert_and_effects<'a>(
     for (name, key) in authority_keys {
         let resp = TransactionInfoResponse::Executed(
             cert.clone(),
-            SignedTransactionEffects::new(epoch, effects.clone(), key, *name),
+            SignedTransactionEffects::new(
+                epoch,
+                effects.clone(),
+                Intent::default().with_scope(IntentScope::TransactionEffects),
+                key,
+                *name,
+            ),
         );
         clients.get_mut(name).unwrap().set_tx_info_response(resp);
     }

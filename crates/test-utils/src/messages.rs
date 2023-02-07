@@ -21,6 +21,7 @@ use sui_types::crypto::{
     AuthorityPublicKeyBytes, AuthoritySignInfo, KeypairTraits,
 };
 use sui_types::gas_coin::GasCoin;
+use sui_types::intent::{Intent, IntentScope};
 use sui_types::messages::SignedTransactionEffects;
 use sui_types::messages::{CallArg, DUMMY_GAS_PRICE};
 use sui_types::messages::{
@@ -492,6 +493,7 @@ pub fn make_tx_certs_and_signed_effects_with_committee(
                 let signed_effects = SignedTransactionEffects::new(
                     committee.epoch(),
                     effects,
+                    Intent::default().with_scope(IntentScope::TransactionEffects),
                     key,
                     AuthorityPublicKeyBytes::from(key.public()),
                 );

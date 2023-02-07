@@ -29,6 +29,8 @@ use std::time::Duration;
 use std::{collections::HashMap, pin::Pin, sync::Arc};
 use sui_config::node::AuthorityStorePruningConfig;
 use sui_protocol_constants::{MAX_TX_GAS, STORAGE_GAS_PRICE};
+use sui_types::intent::Intent;
+use sui_types::intent::IntentScope;
 use sui_types::parse_sui_struct_tag;
 use tap::TapFallible;
 use tokio::sync::mpsc::unbounded_channel;
@@ -1031,9 +1033,14 @@ impl AuthorityState {
                 epoch_store.epoch(),
             );
 
-        let signed_effects = VerifiedSignedTransactionEffects::new_unchecked(
-            SignedTransactionEffects::new(epoch_store.epoch(), effects, &*self.secret, self.name),
-        );
+        let signed_effects =
+            VerifiedSignedTransactionEffects::new_unchecked(SignedTransactionEffects::new(
+                epoch_store.epoch(),
+                effects,
+                Intent::default().with_scope(IntentScope::TransactionEffects),
+                &*self.secret,
+                self.name,
+            ));
         Ok((inner_temp_store, signed_effects))
     }
 
@@ -2383,6 +2390,7 @@ impl AuthorityState {
                 VerifiedSignedTransactionEffects::new_unchecked(SignedTransactionEffects::new(
                     cur_epoch,
                     effects.into_message(),
+                    Intent::default().with_scope(IntentScope::TransactionEffects),
                     &*self.secret,
                     self.name,
                 ))

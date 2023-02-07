@@ -12,6 +12,7 @@ use crate::crypto::{
 };
 use crate::error::SuiResult;
 use crate::gas::GasCostSummary;
+use crate::intent::{Intent, IntentScope};
 use crate::{
     base_types::AuthorityName,
     committee::Committee,
@@ -204,7 +205,13 @@ impl SignedCheckpointSummary {
         signer: &dyn signature::Signer<AuthoritySignature>,
     ) -> SignedCheckpointSummary {
         let epoch = checkpoint.epoch;
-        let auth_signature = AuthoritySignInfo::new(epoch, &checkpoint, authority, signer);
+        let auth_signature = AuthoritySignInfo::new(
+            epoch,
+            &checkpoint,
+            Intent::default().with_scope(IntentScope::CheckpointSummary),
+            authority,
+            signer,
+        );
         SignedCheckpointSummary {
             summary: checkpoint,
             auth_signature,
@@ -301,7 +308,11 @@ impl CertifiedCheckpointSummary {
             SuiError::from("Epoch in the summary doesn't match with the committee")
         );
         let mut obligation = VerificationObligation::default();
-        let idx = obligation.add_message(&self.summary, self.auth_signature.epoch);
+        let idx = obligation.add_message(
+            &self.summary,
+            self.auth_signature.epoch,
+            Intent::default().with_scope(IntentScope::Checkpoint),
+        );
         self.auth_signature
             .add_to_verification_obligation(committee, &mut obligation, idx)?;
 
