@@ -270,17 +270,18 @@ impl SuiNode {
         .await?;
 
         let validator_components = if state.is_validator() {
-            Some(
-                Self::construct_validator_components(
-                    config,
-                    state.clone(),
-                    epoch_store.clone(),
-                    checkpoint_store.clone(),
-                    state_sync_handle.clone(),
-                    &registry_service,
-                )
-                .await?,
+            let components = Self::construct_validator_components(
+                config,
+                state.clone(),
+                epoch_store.clone(),
+                checkpoint_store.clone(),
+                state_sync_handle.clone(),
+                &registry_service,
             )
+            .await?;
+            // This is only needed during cold start.
+            components.consensus_adapter.submit_recovered(&epoch_store);
+            Some(components)
         } else {
             None
         };
@@ -453,7 +454,6 @@ impl SuiNode {
         let consensus_adapter = Self::construct_consensus_adapter(
             consensus_config,
             state.name,
-            &epoch_store,
             &registry_service.default_registry(),
         );
 
@@ -583,6 +583,7 @@ impl SuiNode {
                 .expect("Failed to load epoch start configuration")
                 .epoch_start_timestamp_ms
                 .saturating_add(config.epoch_duration_ms),
+            metrics: checkpoint_metrics.clone(),
         });
 
         let certified_checkpoint_output = SendCheckpointToStateSync::new(state_sync_handle);
@@ -626,7 +627,6 @@ impl SuiNode {
     fn construct_consensus_adapter(
         consensus_config: &ConsensusConfig,
         authority: AuthorityName,
-        epoch_store: &Arc<AuthorityPerEpochStore>,
         prometheus_registry: &Registry,
     ) -> Arc<ConsensusAdapter> {
         const REQUEST_TIMEOUT: Duration = Duration::from_secs(20);
@@ -648,12 +648,7 @@ impl SuiNode {
         let ca_metrics = ConsensusAdapterMetrics::new(prometheus_registry);
         // The consensus adapter allows the authority to send user certificates through consensus.
 
-        ConsensusAdapter::new(
-            Box::new(consensus_client),
-            authority,
-            epoch_store,
-            ca_metrics,
-        )
+        ConsensusAdapter::new(Box::new(consensus_client), authority, ca_metrics)
     }
 
     async fn start_grpc_validator_service(

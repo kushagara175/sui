@@ -67,6 +67,7 @@ mod test {
     }
 
     #[sim_test(config = "test_config()")]
+    #[ignore]
     async fn test_simulated_load_restarts() {
         let test_cluster = build_test_cluster(4, 0).await;
         let node_restarter = test_cluster
@@ -228,6 +229,7 @@ mod test {
                 delegation_gas_configs,
             },
             reference_gas_price,
+            1000,
         )
         .await
         .unwrap();

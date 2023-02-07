@@ -1,14 +1,14 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import { ActiveValidator } from "@mysten/sui.js";
+import { MoveActiveValidator } from "@mysten/sui.js";
 import { useWalletKit } from "@mysten/wallet-kit";
 import clsx from "clsx";
 import { FormEvent, useState } from "react";
 import { useScorecard } from "../../network/queries/scorecard";
 import { ObjectData } from "../../network/rawObject";
 import { Delegation, StakedSui } from "../../network/types";
-import { formatAddress, formatBalance } from "../../utils/format";
+import { formatBalance } from "../../utils/format";
 import { AddDelegation } from "./actions/AddDelegation";
 import { CancelDelegation } from "./actions/CancelDelegation";
 import { WithdrawDelegation } from "./actions/WithdrawDelegation";
@@ -18,7 +18,7 @@ import { Target } from "./Target";
 
 interface Props {
   index: number;
-  validator: ActiveValidator;
+  validator: MoveActiveValidator;
   stake: ObjectData<StakedSui>;
   delegation?: ObjectData<Delegation>;
 }
@@ -72,23 +72,24 @@ export function ValidatorItem({ index, validator, stake, delegation }: Props) {
       <div>
         <div className="w-3/4">
           <div className="relative flex items-center">
-            <input
-              disabled={!!stake}
-              type="number"
-              // Some arbitrary decent step value:
-              step={0.0001}
-              min={0}
-              onInput={onInputAmount}
-              className={clsx(
-                "block w-full pr-28 bg-white rounded-lg py-2 pl-3 border-steel-darker/30 border appearance-none",
-                stake && "font-bold"
-              )}
-              placeholder="0 SUI"
-              defaultValue={
-                stake &&
-                formatBalance(stake?.data.staked.toString() || "0", DEC)
-              }
-            />
+            {stake ? (
+              <div className="block w-full pr-28 bg-white rounded-lg py-2 pl-3 border-steel-darker/30 border font-bold">
+                {formatBalance(stake?.data.staked.toString() || "0", DEC)} SUI
+              </div>
+            ) : (
+              <input
+                type="number"
+                // Some arbitrary decent step value:
+                step={0.0001}
+                min={0}
+                onInput={onInputAmount}
+                className={clsx(
+                  "block w-full pr-28 bg-white rounded-lg py-2 pl-3 border-steel-darker/30 border appearance-none"
+                )}
+                placeholder="0 SUI"
+                value={amount}
+              />
+            )}
 
             {delegation ? (
               <WithdrawDelegation delegation={delegation!} stake={stake} />
