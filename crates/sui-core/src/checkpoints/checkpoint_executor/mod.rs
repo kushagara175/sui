@@ -453,6 +453,7 @@ async fn execute_transactions(
             }
             Ok(Err(err)) => return Err(err),
             Ok(Ok(effects)) => {
+                let checkpoint_sequence = checkpoint.sequence_number();
                 for (tx_digest, expected_effects_digest, actual_effects) in
                     izip!(&all_tx_digests, &effects_digests, &effects)
                 {
@@ -464,14 +465,13 @@ async fn execute_transactions(
                 authority_store.insert_executed_transactions(
                     &all_tx_digests,
                     epoch_store.epoch(),
-                    checkpoint.sequence_number(),
+                    checkpoint_sequence,
                 )?;
 
-                let checkpoint_seq_num = checkpoint.sequence_number();
                 let effects: Vec<TransactionEffects> =
                     effects.into_iter().map(|fx| fx.data().clone()).collect();
 
-                accumulator.accumulate_checkpoint(effects, checkpoint_seq_num, epoch_store)?;
+                accumulator.accumulate_checkpoint(effects, checkpoint_sequence, epoch_store)?;
 
                 return Ok(());
             }
