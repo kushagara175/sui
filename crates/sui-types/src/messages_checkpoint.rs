@@ -18,15 +18,12 @@ use crate::{
     crypto::{sha3_hash, AuthoritySignature, VerificationObligation},
     error::SuiError,
 };
-use fastcrypto::encoding::{Base58, Encoding, Hex};
 use schemars::JsonSchema;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
 pub use crate::digests::CheckpointContentsDigest;
 pub use crate::digests::CheckpointDigest;
-use std::fmt::{Debug, Display, Formatter};
-use std::slice::Iter;
 
 pub type CheckpointSequenceNumber = u64;
 pub type CheckpointTimestamp = u64;

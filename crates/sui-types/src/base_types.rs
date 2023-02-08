@@ -6,6 +6,7 @@ pub use crate::committee::EpochId;
 use crate::crypto::{
     AuthorityPublicKey, AuthorityPublicKeyBytes, KeypairTraits, PublicKey, SuiPublicKey,
 };
+pub use crate::digests::{ObjectDigest, TransactionDigest, TransactionEffectsDigest};
 use crate::error::ExecutionError;
 use crate::error::ExecutionErrorKind;
 use crate::error::SuiError;
@@ -16,6 +17,8 @@ use crate::sui_serde::Readable;
 use crate::sui_serde::ToArray;
 use anyhow::anyhow;
 use fastcrypto::encoding::decode_bytes_hex;
+use fastcrypto::encoding::{Encoding, Hex};
+use fastcrypto::hash::{HashFunction, Sha3_256};
 use move_core_types::account_address::AccountAddress;
 use move_core_types::ident_str;
 use move_core_types::identifier::IdentStr;
@@ -28,20 +31,6 @@ use std::cmp::max;
 use std::convert::{TryFrom, TryInto};
 use std::fmt;
 use std::str::FromStr;
-
-pub use crate::committee::EpochId;
-use crate::crypto::{
-    AuthorityPublicKey, AuthorityPublicKeyBytes, KeypairTraits, PublicKey, SuiPublicKey,
-};
-pub use crate::digests::{ObjectDigest, TransactionDigest, TransactionEffectsDigest};
-use crate::error::ExecutionError;
-use crate::error::ExecutionErrorKind;
-use crate::error::SuiError;
-use crate::gas_coin::GasCoin;
-use crate::object::{Object, Owner};
-use crate::sui_serde::Readable;
-use fastcrypto::encoding::{Encoding, Hex};
-use fastcrypto::hash::{HashFunction, Sha3_256};
 
 #[cfg(test)]
 #[path = "unit_tests/base_types_tests.rs"]
