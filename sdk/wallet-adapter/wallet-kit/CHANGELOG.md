@@ -1,5 +1,20 @@
 # @mysten/wallet-kit
 
+## 0.2.7
+
+### Patch Changes
+
+- fcba70206: Add basic formatting utilities
+- Updated dependencies [fcba70206]
+- Updated dependencies [f51c85e85]
+- Updated dependencies [e630f6832]
+  - @mysten/sui.js@0.27.0
+  - @mysten/wallet-adapter-base@0.5.2
+  - @mysten/wallet-adapter-unsafe-burner@0.5.2
+  - @mysten/wallet-adapter-wallet-standard@0.5.2
+  - @mysten/wallet-kit-core@0.2.5
+  - @mysten/wallet-standard@0.3.2
+
 ## 0.2.6
 
 ### Patch Changes
